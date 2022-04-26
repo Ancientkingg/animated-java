@@ -13,5 +13,5 @@ export default function createPlayerModel(){
     let right_leg = new Group({name: "RL", origin: [1.7813, 11.25, 0.0938], isOpen: true}).addTo(hips).init();
     let right_legCube = new Cube({name: "Right Leg", from: [-0.09375, 0, -1.78125], to: [3.65625, 11.25, 1.96875], uv_offset: [0, 16]}).addTo(right_leg).init();
     let left_leg = new Group({name: "LL", origin: [-1.7813, 11.25, 0.0938], isOpen: true}).addTo(hips).init();
-    let left_legCube = new Cube({name: "Left Leg", from: [-3.65625, 0, -1.78125], to: [0.09375, 11.25, 1.96875], uv_offset: [16, 48]}).addTo(right_leg).init();
+    let left_legCube = new Cube({name: "Left Leg", from: [-3.65625, 0, -1.78125], to: [0.09375, 11.25, 1.96875], uv_offset: [16, 48]}).addTo(left_leg).init();
 }
