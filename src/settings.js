@@ -38,39 +38,6 @@ export const DefaultSettings = {
 				return d
 			},
 		},
-		exporter: {
-			get title() {
-				return tl('animatedJava.settings.exporter.title')
-			},
-			get description() {
-				return tl('animatedJava.settings.exporter.description')
-			},
-			type: 'select',
-			get default() {
-				return [...store.getStore('exporters').keys()][0]
-			},
-			get options() {
-				return Object.fromEntries(
-					[...store.getStore('exporters').keys()].map((v) => [
-						v,
-						ForeignSettingTranslationKeys[v],
-					])
-				)
-			},
-			onUpdate(d) {
-				console.log(d)
-				console.log([...store.getStore('exporters').keys()])
-				if (
-					![...store.getStore('exporters').keys()].includes(d.value)
-				) {
-					d.isValid = false
-					d.error = tl(
-						'animatedJava.settings.exporter.errors.mustBeValidExporter'
-					)
-				}
-				return d
-			},
-		},
 		verbose: {
 			get title() {
 				return tl('animatedJava.settings.verbose.title')

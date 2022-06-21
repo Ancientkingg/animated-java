@@ -255,7 +255,7 @@ MenuBar.addAction(
 		click: () => {
 			// Call the selected exporter.
 			// @ts-ignore
-			const exporter = settings.animatedJava.exporter
+			const exporter = "PHAnimationExporter"
 			if (exporter) {
 				store.getStore('exporters').get(exporter)()
 			} else {
