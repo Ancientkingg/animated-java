@@ -121,6 +121,10 @@ animatedJava:
             title: Bone Config
             boneNbt: Bone NBT
             armAnimationEnabled: Enable Arm Animation
+            pivot:
+                title: Bone Pivot
+                head: Head
+                hand: Hand
 
         variants:
             title: Model Variants

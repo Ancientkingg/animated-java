@@ -38,22 +38,22 @@ function rawExport(exportData: any) {
 				
 				const variantName = frame.bones[bone].variant
 				try {
-					if (variantName == "") {
+					if (variantName == "default" || variantName == "") {
 						frame.bones[bone].custom_model_data = exportData.scaleModels[bone][vecStr].aj.customModelData
 					} else {
 						frame.bones[bone].custom_model_data = exportData.variantModels[variantName][`${bone}_${vecStr}`].aj.customModelData
 					}
 				} catch (e) {
-					if (variantName == "") {
+					if (variantName == "default" || variantName == "") {
 						frame.bones[bone].custom_model_data = exportData.models[bone].aj.customModelData
 					} else {
 						frame.bones[bone].custom_model_data = exportData.variantModels[variantName][bone].aj.customModelData
 					}
 				}
 				
-			});
-		});
-	});
+			})
+		})
+	})
 
 	const stateNames = Object.keys(exportData.variantModels)
 
@@ -68,7 +68,14 @@ function rawExport(exportData: any) {
 		}
  	}
 
+	const pivots = {};
 
+	Object.keys(exportData.bones).forEach(bone => {
+		const armAnimationEnabled: boolean = exportData.bones[bone].armAnimationEnabled
+
+		pivots[bone] = armAnimationEnabled ? 'hand' : 'head';
+
+	})
 
 	const FILE = {
 		meta: {
@@ -76,7 +83,8 @@ function rawExport(exportData: any) {
 			variant: {
 				variants: stateNames,
 				offset: variantOffset
-			}
+			},
+			pivot: pivots
 		},
 		animations: exportData.animations,
 	}

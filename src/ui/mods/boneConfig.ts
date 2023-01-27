@@ -18,23 +18,27 @@ const openBoneConfig = CustomAction('animatedJava.BoneConfig', {
 			title: tl('animatedJava.dialogs.boneConfig.title'),
 			id: 'boneConfig',
 			form: {
-				nbt: {
-					type: 'textarea',
-					label: tl('animatedJava.dialogs.boneConfig.boneNbt'),
-					value: selected.nbt,
-				},
-				// armAnimationEnabled: {
-				// 	type: 'checkbox',
-				// 	label: tl(
-				// 		'animatedJava.boneConfig.armAnimationEnabled'
-				// 	),
-				// 	value: false,
+				// nbt: {
+				// 	type: 'textarea',
+				// 	label: tl('animatedJava.dialogs.boneConfig.boneNbt'),
+				// 	value: selected.nbt,
 				// },
+				pivot: {
+					type: 'select',
+					options: {
+						head: tl('animatedJava.dialogs.boneConfig.pivot.head'),	
+						hand: tl('animatedJava.dialogs.boneConfig.pivot.hand'),
+					},
+					label: tl(
+						'animatedJava.dialogs.boneConfig.pivot.title'
+					),
+					value: 'head',
+				},
 			},
 			onConfirm: (formData: any) => {
 				console.log(formData)
 				selected.nbt = formData.nbt
-				// selected.armAnimationEnabled = formData.armAnimationEnabled
+				selected.armAnimationEnabled = formData.pivot == 'hand'
 				dialog.hide()
 			},
 		}).show()
@@ -43,9 +47,10 @@ const openBoneConfig = CustomAction('animatedJava.BoneConfig', {
 		// console.log(selected.armAnimationEnabled)
 		// TODO Add armor_stand arm animation
 		// @ts-ignore
+		document.querySelector('#pivot').value = selected.armAnimationEnabled ? 'hand' : 'head'
 		// document.querySelector('#armAnimationEnabled').checked =
 		// 	selected.armAnimationEnabled
-		selected.armAnimationEnabled = false
+		// selected.armAnimationEnabled = false
 	},
 })
 
