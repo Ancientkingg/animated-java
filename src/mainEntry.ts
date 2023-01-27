@@ -60,6 +60,7 @@ import { format as modelFormat } from './modelFormat'
 import { renderAnimation } from './animationRenderer'
 import { DefaultSettings, settings } from './settings'
 import createPlayerModel from './playerModelAction'
+import './variantAnimation/variantKeyframes'
 // import { makeArmorStandModel } from './makeArmorStandModel'
 
 import {
@@ -74,7 +75,7 @@ import {
 	computeVariantTextureOverrides,
 	computeBones,
 	computeVariantModels,
-	computeScaleModelOverrides,
+	computeScaleModels
 } from './modelComputation'
 
 export const BuildModel = (callback: any, options: any) => {
@@ -158,34 +159,33 @@ async function computeAnimationData(
 	) as aj.VariantTextureOverrides
 	const bones = computeBones(models, animations) as aj.BoneObject
 	// const [variantModels, variantTouchedModels] = await computeVariantModels(models, variantTextureOverrides)
+	let scaleModels = computeScaleModels(bones);
 	const variants = (await computeVariantModels(
 		models,
+		scaleModels,
 		variantTextureOverrides
 	)) as {
 		variantModels: aj.VariantModels
+		scaleModels: aj.ScaleModels
 		variantTouchedModels: aj.variantTouchedModels
 	}
-	const scaleModelOverrides = computeScaleModelOverrides(
-		models,
-		bones,
-		animations
-	)
 
 	// const flatVariantModels = {}
 	// Object.values(variantModels).forEach(variant => Object.entries(variant).forEach(([k,v]) => flatVariantModels[k] = v))
 	// console.log('Flat Variant Models:', flatVariantModels)
 
-	await exportRigModels(models, variants.variantModels)
-	await exportPredicate(models, variants.variantModels, settings.animatedJava)
+	await exportRigModels(models, variants.variantModels, scaleModels)
+	await exportPredicate(models, variants.variantModels, scaleModels, settings.animatedJava)
 	if (settings.animatedJava.transparentTexturePath) {
 		await exportTransparentTexture()
-	}
+	}	
 
 	const data = {
 		settings: settings.toObject() as aj.GlobalSettings,
 		cubeData,
 		bones,
 		models,
+		scaleModels,
 		variantTextureOverrides,
 		variantModels: variants.variantModels,
 		variantTouchedModels: variants.variantTouchedModels,
@@ -294,6 +294,7 @@ MenuBar.addAction(
 MenuBar.update()
 const cb = () => {
 	store.set('states', { default: {} })
+	store.set('selectedIndex', 0)
 	settings.update(DefaultSettings, true)
 	//@ts-ignore;
 	Project.UUID = globalThis.guid()

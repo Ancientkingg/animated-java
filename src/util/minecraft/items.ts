@@ -39,10 +39,6 @@ function queryItems() {
 				if (response) {
 					const json = await response.json()
 					if (json) {
-						console.log(
-							'Successfully Collected Item List:',
-							json.values
-						)
 						Items.items = json.values
 						localStorage.setItem(
 							'animated-java<minecraftItemList>',

@@ -458,11 +458,13 @@ function StatePanel() {
 															selectedIndex
 														) {
 															setSelectedIndex(-1)
+															store.set('selectedIndex', -1)
 															updateDisplay({})
 														} else {
 															setSelectedIndex(
 																index
 															)
+															store.set('selectedIndex', index)
 															updateDisplay(
 																states[state]
 															)
@@ -485,6 +487,7 @@ function StatePanel() {
 															states[state]
 														)
 														setSelectedIndex(index)
+														store.set('selectedIndex', index)
 														setOverlayVisible(state)
 														setDialogVisible(true)
 													}}

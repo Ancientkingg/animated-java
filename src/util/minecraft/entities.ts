@@ -39,10 +39,6 @@ function queryEntities() {
 				if (response) {
 					const json = await response.json()
 					if (json) {
-						console.log(
-							'Successfully Collected Entity List:',
-							json.values
-						)
 						Entities.entities = json.values
 						localStorage.setItem(
 							'animated-java<minecraftEntityList>',

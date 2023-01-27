@@ -4,7 +4,8 @@ import { bus } from './util/bus'
 
 import { settings } from './settings'
 function createBox() {
-	const a = new THREE.BoxBufferGeometry(16 * 7, 16 * 7, 16 * 7)
+	const size = true ? 3 : 7
+	const a = new THREE.BoxGeometry(16 * size, 16 * size, 16 * size)
 	const b = new THREE.EdgesGeometry(a)
 	const c = new THREE.LineSegments(
 		b,
@@ -20,6 +21,34 @@ let last = null
 let last_mult = null
 let Selected = null
 let mode
+let $originalCanvasHideGizmos = Canvas.withoutGizmos
+bus.on(EVENTS.LIFECYCLE.CLEANUP, () => {
+	Canvas.withoutGizmos = $originalCanvasHideGizmos
+	visboxs.forEach((box) => {
+		if (box?.parent) box.parent.remove(box)
+	})
+	visboxs = []
+})
+bus.on(EVENTS.LIFECYCLE.LOAD, () => {
+	Canvas.withoutGizmos = (...args) => {
+		visboxs.forEach((v) => (v.visible = false))
+		$originalCanvasHideGizmos.apply(Canvas, args)
+		visboxs.forEach((v) => (v.visible = true))
+	}
+})
+settings.watch('animatedJava.modelScalingMode', () => {
+	if (Selected) {
+		visboxs = []
+		for (let item of Selected) {
+			if (item.visbox) {
+				item.mesh.remove(item.visbox)
+				item.visbox = createBox()
+				item.mesh.add(item.visbox)
+				visboxs.push(item.visbox)
+			}
+		}
+	}
+})
 Blockbench.on('update_selection', () => {
 	if (format.id === Format.id) {
 		if (Group.selected || Mode.selected.name === 'Animate') {
@@ -48,7 +77,7 @@ bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 				Array.from(last_mult || []).forEach((item) => {
 					if (item.visbox) {
 						item.mesh.remove(item.visbox)
-						console.log(`remove ${item.name}`)
+						// console.log(`remove ${item.name}`)
 						delete item.visbox
 					}
 				})
@@ -68,7 +97,9 @@ bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 					}
 					if (parent !== last) {
 						if (visboxs.length) {
-							visboxs.forEach((v) => v.parent.remove(v))
+							try {
+								visboxs.forEach((v) => v.parent.remove(v))
+							} catch (e) {}
 							visboxs = []
 						}
 						if (parent && parent.name !== 'SCENE') {
@@ -98,15 +129,22 @@ bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 							visboxs.push(item.visbox)
 							item.mesh.add(item.visbox)
 							Canvas.outlines.attach(item.visbox)
-							console.log(`add ${item.name}`)
+							// console.log(`add ${item.name}`)
 						}
 					})
 					old.forEach((item) => {
 						if (!Selected.has(item)) {
 							if (item.visbox) {
-								Canvas.outlines.remove(item.visbox)
-								console.log(`remove ${item.name}`)
-								visboxs.splice(visboxs.indexOf(item.visbox), 1)
+								try {
+									console.log(`remove ${item.name}`)
+									item.mesh.remove(item.visbox)
+									visboxs.splice(visboxs.indexOf(item.visbox), 1)
+									console.log(`remove ${item.name}`)
+									visboxs.splice(
+										visboxs.indexOf(item.visbox),
+										1
+									)
+								} catch (e) {}
 								delete item.visbox
 							}
 						}
@@ -117,7 +155,7 @@ bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 				Array.from(last_mult || []).forEach((item) => {
 					if (item.visbox) {
 						item.mesh.remove(item.visbox)
-						console.log(`remove ${item.name}`)
+						// console.log(`remove ${item.name}`)
 						delete item.visbox
 					}
 				})

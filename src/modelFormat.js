@@ -194,6 +194,7 @@ const codec = new Codec('ajmodel', {
 			console.log('Got states from model file')
 		} else {
 			store.set('states', { default: {} })
+			store.set('selectedIndex', 0)
 		}
 		if (model.meta.model_format) {
 			var format = Formats[model.meta.model_format] || Formats.free

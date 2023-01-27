@@ -11,10 +11,13 @@ import { getModelPath } from './util/minecraft/resourcepack'
 // @ts-ignore
 import transparent from './assets/transparent.png'
 
+import { getModelExportFolder, toJson } from './util/extraUtils'
+
 // Exports the model.json rig files
 async function exportRigModels(
 	models: aj.ModelObject,
-	variantModels: aj.VariantModels
+	variantModels: aj.VariantModels,
+	scaleModels: aj.ScaleModels
 ) {
 	console.groupCollapsed('Export Rig Models')
 	const metaPath = path.join(
@@ -182,6 +185,29 @@ async function exportRigModels(
 	}
 	console.groupEnd()
 
+	console.log('Export Scale Models:', scaleModels)
+	console.group('Details')
+	for (const [modelName, scales] of Object.entries(scaleModels)) {
+		// Export the models
+		for (const [scale, model] of Object.entries(scales)) {
+			// Get the model's file path
+			const modelFilePath = path.join(
+				getModelExportFolder(settings),
+				`${modelName}_${scale}.json`
+			)
+
+			console.log('Exporting Model', scale, modelFilePath)
+			const modelJSON = {
+				...model,
+				aj: undefined,
+			}
+
+			Blockbench.writeFile(modelFilePath, {
+				content: autoStringify(modelJSON),
+				custom_writer: null,
+			})
+		}
+	}
 	console.groupEnd()
 }
 
@@ -234,7 +260,9 @@ function throwPredicateMergingError(reason: string) {
 async function exportPredicate(
 	models: aj.ModelObject,
 	variantModels: aj.VariantModels,
+	scaleModels: aj.ScaleModels,
 	ajSettings: aj.Settings
+	
 ) {
 	console.groupCollapsed('Export Predicate Model')
 
@@ -358,6 +386,25 @@ async function exportPredicate(
 				),
 			})
 		}
+
+	for (const [modelName, scales] of Object.entries(scaleModels)) {
+		// Export the models
+		for (const [scale, model] of Object.entries(scales)) {
+			// Get the model's file path
+			model.aj.customModelData = idGenerator.next().value as number
+			myMeta.push(model.aj.customModelData)
+			predicateJSON.overrides.push({
+				predicate: { custom_model_data: model.aj.customModelData },
+				model: getModelPath(
+					path.join(
+						ajSettings.rigModelsExportFolder,
+						`${modelName}_${scale}`
+					),
+					modelName
+				),
+			})
+		}
+	}
 
 	predicateJSON.overrides.sort((a: any, b: any) => {
 		return a.predicate.custom_model_data - b.predicate.custom_model_data

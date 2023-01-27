@@ -247,6 +247,30 @@ export interface CubeData {
 	textures_used: Texture[]
 }
 
+type Vector3 = [number, number, number]
+
+export type ModelDisplay = {
+	head: {
+		translation: Vector3,
+		rotation: Vector3,
+		scale: Vector3,
+	},
+}
+
+export type ScaleModel = {
+	aj: {
+		customModelData: number
+	}
+	parent: string
+	display: ModelDisplay
+}
+
+export interface ScaleModels {
+	[index: string]: {
+		[index: string]: ScaleModel
+	}
+}
+
 export type VariantModel = {
 	aj: {
 		customModelData: number

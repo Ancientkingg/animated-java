@@ -14,6 +14,7 @@ import { tl } from './util/intl'
 import { format, safeFunctionName } from './util/replace'
 import { isSceneBased } from './util/hasSceneAsParent'
 import { CustomError } from './util/customError'
+import { updateVariantsRender } from './variantAnimation/variantKeyframes'
 store.set('staticAnimationUuid', '138747e7-2de0-4130-b900-9275ca0e6333')
 
 function setAnimatorTime(time) {
@@ -35,6 +36,7 @@ function setAnimatorTime(time) {
 // 	Timeline.selected = point.keyframes
 // 	setAnimatorTime(point.time)
 // }
+
 function getRotations(animation) {
 	const bones = {}
 	Group.all.forEach((group) => {
@@ -88,11 +90,27 @@ function getScales() {
 	return result
 }
 
+function getVariants(animation) {
+	const result = {}
+	updateVariantsRender(animation)
+	Object.values(animation.animators).forEach((animator) => {
+		const group = animator.group
+		if (Object.hasOwn(group, "stateInfo") && Timeline.time == group.stateInfo.frameID) {
+			result[group.name] = group.stateInfo.state
+		} else {
+			result[group.name] = ""
+		}
+	})
+
+	return result
+}
+
 function getData(animation, renderedGroups) {
 	Animator.preview(false)
 	const pos = getPositions()
 	const rot = getRotations(animation)
 	const scl = getScales()
+	const variants = getVariants(animation)
 	const res = {}
 	renderedGroups.forEach((group) => {
 		const thisPos = pos[group.name]
@@ -110,6 +128,7 @@ function getData(animation, renderedGroups) {
 				z: thisRot[2],
 			},
 			scale: scl[group.name],
+			variant: variants[group.name]
 		}
 	})
 	return res
@@ -242,7 +261,7 @@ async function renderAnimation(options) {
 
 	if (options.generate_static_animation) {
 		static_animation = new Animation({
-			name: 'animatedJava.staticSnimation',
+			name: 'animatedJava.staticAnimation',
 			snapping: 20,
 			length: 0,
 		}).add(false)

@@ -1,5 +1,6 @@
 import { bus, tl } from './util'
 import EVENTS from './constants/events'
+import { store } from './util/store'
 
 bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 	const menu = new BarMenu('JavaAnimation', [], () => Format.id === format.id)
@@ -22,6 +23,7 @@ bus.on(EVENTS.LIFECYCLE.LOAD, () => {
 	MenuBar.update()
 	Blockbench.on('new_project', () => {
 		store.set('states', { default: {} })
+		store.set('selectedIndex', 0)
 		settings.update(DefaultSettings)
 		bus.dispatch(EVENTS.LIFECYCLE.LOAD_MODEL, {})
 	})

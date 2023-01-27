@@ -7,6 +7,14 @@ interface PHAnimationExporterSettings {
 	outputJsonPath: string
 }
 
+function roundScale(scale) {
+	return {
+		x: roundToN(scale.x, 1000),
+		y: roundToN(scale.y, 1000),
+		z: roundToN(scale.z, 1000),
+	}
+}
+
 function rawExport(exportData: any) {
 	const ajSettings = exportData.settings.animatedJava
 	const exporterSettings = exportData.settings
@@ -14,24 +22,61 @@ function rawExport(exportData: any) {
 	Object.keys(exportData.animations).forEach((animation) => {
 		exportData.animations[animation].frames.forEach((frame) => {
 			Object.keys(frame.bones).forEach((bone) => {
-				frame.bones[bone].pos.x = roundToN(frame.bones[bone].pos.x + (7./16.), 1000);
-				frame.bones[bone].pos.y = roundToN(frame.bones[bone].pos.y - (22./16.), 1000);
-				frame.bones[bone].pos.z = roundToN(frame.bones[bone].pos.z, 1000);
+				// 6. / 16. & 22. / 16.
+				frame.bones[bone].pos.x = roundToN(frame.bones[bone].pos.x, 1000)
+				frame.bones[bone].pos.y = roundToN(frame.bones[bone].pos.y + -1.813, 1000)
+				frame.bones[bone].pos.z = roundToN(frame.bones[bone].pos.z, 1000)
 
-				frame.bones[bone].rot.x = roundToN(frame.bones[bone].rot.x, 1000);
-				frame.bones[bone].rot.y = roundToN(frame.bones[bone].rot.y, 1000);
-				frame.bones[bone].rot.z = roundToN(frame.bones[bone].rot.z, 1000);
+				frame.bones[bone].rot.x = roundToN(frame.bones[bone].rot.x, 1000)
+				frame.bones[bone].rot.y = roundToN(frame.bones[bone].rot.y, 1000)
+				frame.bones[bone].rot.z = roundToN(frame.bones[bone].rot.z, 1000)
 
-				delete frame.bones[bone].scale;
+				const scale = roundScale(frame.bones[bone].scale)
+				const vecStr = `${scale.x}-${scale.y}-${scale.z}`
 
-				frame.bones[bone].custom_model_data = exportData.models[bone].aj.customModelData;
+				delete frame.bones[bone].scale
+				
+				const variantName = frame.bones[bone].variant
+				try {
+					if (variantName == "") {
+						frame.bones[bone].custom_model_data = exportData.scaleModels[bone][vecStr].aj.customModelData
+					} else {
+						frame.bones[bone].custom_model_data = exportData.variantModels[variantName][`${bone}_${vecStr}`].aj.customModelData
+					}
+				} catch (e) {
+					if (variantName == "") {
+						frame.bones[bone].custom_model_data = exportData.models[bone].aj.customModelData
+					} else {
+						frame.bones[bone].custom_model_data = exportData.variantModels[variantName][bone].aj.customModelData
+					}
+				}
+				
 			});
 		});
 	});
 
+	const stateNames = Object.keys(exportData.variantModels)
+
+	let variantOffset = 0
+
+	if (Object.keys(exportData.scaleModels).length == 0) {
+		// check `models`
+		variantOffset = Object.keys(exportData.models).length
+	} else {
+		for (const bone of Object.values(exportData.scaleModels)) {
+			variantOffset += Object.keys(bone).length + 1
+		}
+ 	}
+
+
+
 	const FILE = {
 		meta: {
 			head_item: ajSettings.rigItem,
+			variant: {
+				variants: stateNames,
+				offset: variantOffset
+			}
 		},
 		animations: exportData.animations,
 	}
